@@ -1,4 +1,5 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
+import { Schema } from "yup";
 
 const errorMiddleware = (
   err: Error,
@@ -23,16 +24,33 @@ const routeNotFoundHandler = (req: Request, res: Response) => {
   });
 };
 
-
 const errorHandling = (fn: RequestHandler) => {
-    return async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            await fn(req, res, next);
-        } catch (error) {
-            res.status(400).json(error);
-            next(error);
-        }
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await fn(req, res, next);
+    } catch (error) {
+      res.status(400).json(error);
+      next(error);
     }
-}
+  };
+};
 
-export { errorMiddleware, routeNotFoundHandler, errorHandling };
+const validateData =
+  (schema: Schema) => (req: Request, res: Response, next: NextFunction) => {
+    schema
+      .validate(req.body)
+      .then(() => next())
+      .catch((validationError) => {
+        const errors = validationError.inner.map((error: any) => ({
+          field: error.path,
+          message: error.message,
+        }));
+
+        res.status(400).json({
+          message: "Validation Error",
+          errors: errors,
+        });
+      });
+  };
+
+export { errorMiddleware, routeNotFoundHandler, errorHandling, validateData };

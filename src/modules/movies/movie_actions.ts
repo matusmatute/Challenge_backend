@@ -3,7 +3,10 @@ import { handleErrors } from "../../utils/errorHandling";
 
 export const getMovies = () => handleErrors(Movie.find());
 
-export const createMovie = (data: MovieAPI) => handleErrors(Movie.create(data));
+export const createMovie = function (data: MovieAPI) {
+  const newMovie = new Movie(data);
+  return handleErrors(newMovie.save());
+};
 
 export const getMovieById = (id: string) => handleErrors(Movie.findById(id));
 
