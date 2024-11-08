@@ -2,6 +2,7 @@ import * as ActionsMovie from "./movie_actions";
 import { Request, Response } from "express";
 import { Movie } from "./movie_model";
 import { errorHandling } from "../../middleware/middleware";
+import { notifyNewMovie } from "../../utils/notifications";
 
 export const addMovie = errorHandling(async (req: Request, res: Response) => {
   console.log(req.body);
@@ -9,6 +10,7 @@ export const addMovie = errorHandling(async (req: Request, res: Response) => {
   const { body } = req;
   const newMovie = new Movie(body);
   const createdMovie = await ActionsMovie.createMovie(newMovie);
+  notifyNewMovie(createdMovie);
   res.status(201).json(createdMovie);
 });
 
